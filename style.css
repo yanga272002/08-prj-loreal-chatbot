@@ -95,34 +95,91 @@ body {
 }
 
 .chat-window {
-  height: 360px;
+  min-height: 380px;
+  max-height: 520px;
   border: 1px solid var(--loreal-border);
   border-top: 3px solid var(--loreal-gold); /* Parisian gold luxury accent line */
-  border-radius: 4px;
-  padding: 20px;
-  font-size: 18px;
-  line-height: 1.5;
+  border-radius: 8px;
+  padding: 24px;
+  font-size: 16px;
+  line-height: 1.6;
   overflow-y: auto;
   background: var(--loreal-bg-light);
-  white-space: pre-line;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-/* —— messages —— */
-.msg {
-  margin-bottom: 14px;
-  line-height: 1.5;
+/* —— distinct chat bubbles —— */
+.chat-bubble {
+  display: flex;
+  flex-direction: column;
+  max-width: 85%;
+  padding: 12px 18px;
+  word-break: break-word;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  animation: fadeInBubble 0.2s ease-out;
 }
 
-/* User message: bold, high-contrast black */
-.msg.user {
-  color: var(--loreal-black);
-  font-weight: 500;
+@keyframes fadeInBubble {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* AI response: refined dark neutral */
-.msg.ai {
+/* Bubble sender label */
+.bubble-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+/* Bubble message text */
+.bubble-text {
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+/* User Bubble: Aligned right, sleek high-contrast black */
+.chat-bubble.user {
+  align-self: flex-end;
+  background-color: var(--loreal-black);
+  color: var(--loreal-white);
+  border-radius: 16px 16px 4px 16px;
+}
+
+.chat-bubble.user .bubble-label {
+  color: rgba(255, 255, 255, 0.7);
+  text-align: right;
+}
+
+/* Assistant Bubble: Aligned left, clean luxury white card with L'Oréal red accent stripe */
+.chat-bubble.ai {
+  align-self: flex-start;
+  background-color: var(--loreal-white);
+  color: var(--loreal-text-primary);
+  border: 1px solid var(--loreal-border);
+  border-left: 4px solid var(--loreal-red);
+  border-radius: 16px 16px 16px 4px;
+}
+
+.chat-bubble.ai .bubble-label {
+  color: var(--loreal-red);
+}
+
+/* Loading/thinking state */
+.chat-bubble.ai.loading .bubble-text {
   color: var(--loreal-text-muted);
+  font-style: italic;
 }
 
 /* —— input row —— */

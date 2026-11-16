@@ -10,11 +10,16 @@ const chatWindow = document.getElementById("chatWindow");
 const sendBtn = document.getElementById("sendBtn");
 
 /* 2. Cloudflare Worker URL
-   Update this URL to point to your deployed Cloudflare Worker from RESOURCE_cloudflare-worker.js
-   NOTE: Never put your OpenAI API key in client-side JavaScript. The Worker safely handles the key. */
+   Points to your deployed Cloudflare Worker API proxy. */
 const WORKER_URL = "https://orealworker.wufferssss.workers.dev";
 
-/* 3. System Prompt
+/* 3. Display Setting
+   Set to true to reset the chat view on each submission so only the user's
+   last question and its response are shown (matching the project preview image).
+   Set to false if you want a continuous scrolling log of all questions and answers. */
+const RESET_DISPLAY_PER_QUESTION = true;
+
+/* 4. System Prompt
    Guides the chatbot to act as a L'Oréal beauty advisor and politely refuse unrelated topics. */
 const SYSTEM_PROMPT = `You are the L'Oréal Smart Product Advisor, an expert beauty consultant specializing in L'Oréal Group brands (such as L'Oréal Paris, CeraVe, La Roche-Posay, Maybelline, Lancôme, Garnier, Kérastase, etc.), skincare, haircare, makeup, and fragrances.
 
@@ -24,8 +29,8 @@ Your rules:
 3. When refusing, be polite and helpful, and redirect the user back to L'Oréal beauty topics. Example refusal: "I'm sorry, but I am specifically trained to assist with L'Oréal products, beauty routines, and skincare recommendations. How can I help you with your beauty routine today?"
 4. Keep your answers concise, warm, helpful, and empowering.`;
 
-/* 4. Conversation History
-   Initialize messages array with the system prompt so the model remembers its role */
+/* 5. Conversation History
+   Maintains all previous turns in the messages array so OpenAI remembers context across questions */
 const messages = [
   {
     role: "system",
@@ -33,62 +38,77 @@ const messages = [
   },
 ];
 
-/* 5. Helper function to append messages to the chat window */
-function appendMessage(text, sender) {
-  // Create a new paragraph element for the message
-  const msgElement = document.createElement("p");
-  msgElement.className = `msg ${sender}`;
-  msgElement.textContent = text;
+/* 6. Helper function to create distinct chat bubbles */
+function appendMessage(text, sender, isLoading = false) {
+  // Create outer bubble container
+  const bubble = document.createElement("div");
+  bubble.className = `chat-bubble ${sender}${isLoading ? " loading" : ""}`;
 
-  // Add the message to the chat window
-  chatWindow.appendChild(msgElement);
+  // Add distinct label for author clarity
+  const label = document.createElement("span");
+  label.className = "bubble-label";
+  label.textContent = sender === "user" ? "You" : "L'Oréal Advisor";
+  bubble.appendChild(label);
 
-  // Auto-scroll to the newest message at the bottom
+  // Add message text container
+  const textElement = document.createElement("div");
+  textElement.className = "bubble-text";
+  textElement.textContent = text;
+  bubble.appendChild(textElement);
+
+  // Append bubble to the chat window
+  chatWindow.appendChild(bubble);
+
+  // Auto-scroll to ensure latest message is visible
   chatWindow.scrollTop = chatWindow.scrollHeight;
 
-  return msgElement;
+  // Return text element for easy updates (e.g. replacing 'Thinking...')
+  return textElement;
 }
 
-/* 6. Display initial greeting message from the advisor */
+/* 7. Display initial greeting message from the advisor */
 appendMessage(
   "👋 Hello! I am your L'Oréal Smart Product Advisor. How can I help you find the right skincare, makeup, or haircare products today?",
   "ai"
 );
 
-/* 7. Handle form submission (when the user sends a message) */
+/* 8. Handle form submission (when the user sends a message) */
 chatForm.addEventListener("submit", async (e) => {
-  // Prevent the default browser form reload
+  // Prevent page reload
   e.preventDefault();
 
-  // Capture user input and remove extra spaces
+  // Capture user input and remove extra whitespace
   const userText = userInput.value.trim();
-
-  // If the user didn't type anything, exit early
   if (!userText) {
     return;
   }
 
-  // Display user's message in the chat window
-  appendMessage(userText, "user");
-
-  // Clear the input box
+  // Clear input box
   userInput.value = "";
 
-  // Add the user message to the conversation history
+  // 1. Maintain Conversation History: Add user's question to messages array
   messages.push({
     role: "user",
     content: userText,
   });
 
-  // Display a temporary loading message for the assistant
-  const loadingElement = appendMessage("Thinking...", "ai");
+  // 2. Reset the display if enabled (so only the user's last question and response appear)
+  if (RESET_DISPLAY_PER_QUESTION) {
+    chatWindow.innerHTML = "";
+  }
 
-  // Disable input and button while waiting for response
+  // 3. Display distinct User Bubble (aligned right, above the response)
+  appendMessage(userText, "user");
+
+  // 4. Display distinct Assistant Bubble below with temporary loading state
+  const loadingElement = appendMessage("Thinking...", "ai", true);
+
+  // Disable controls while waiting for API response
   userInput.disabled = true;
   sendBtn.disabled = true;
 
   try {
-    // Send request to the Cloudflare Worker proxy
+    // Send full conversation history to Cloudflare Worker
     const response = await fetch(WORKER_URL, {
       method: "POST",
       headers: {
@@ -103,10 +123,9 @@ chatForm.addEventListener("submit", async (e) => {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
-    // Parse the JSON returned by the worker
     const data = await response.json();
 
-    // Check if OpenAI returned an error object (e.g., invalid key)
+    // Check if OpenAI returned an error object
     if (data.error) {
       throw new Error(data.error.message || "Error from OpenAI API");
     }
@@ -115,19 +134,20 @@ chatForm.addEventListener("submit", async (e) => {
       throw new Error("Invalid response structure received from API");
     }
 
-    // Extract the assistant's reply
     const botReply = data.choices[0].message.content;
 
-    // Update the loading element with the actual reply
+    // Remove loading style and display the actual reply
+    loadingElement.parentElement.classList.remove("loading");
     loadingElement.textContent = botReply;
 
-    // Save the reply into conversation history
+    // Maintain Conversation History: Add assistant's reply to messages array
     messages.push({
       role: "assistant",
       content: botReply,
     });
   } catch (error) {
     console.error("Chat error details:", error);
+    loadingElement.parentElement.classList.remove("loading");
     loadingElement.textContent =
       `I'm sorry, I encountered an issue: ${error.message}. Please check your Cloudflare Worker configuration.`;
   } finally {
