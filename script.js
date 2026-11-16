@@ -100,11 +100,20 @@ chatForm.addEventListener("submit", async (e) => {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
     // Parse the JSON returned by the worker
     const data = await response.json();
+
+    // Check if OpenAI returned an error object (e.g., invalid key)
+    if (data.error) {
+      throw new Error(data.error.message || "Error from OpenAI API");
+    }
+
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      throw new Error("Invalid response structure received from API");
+    }
 
     // Extract the assistant's reply
     const botReply = data.choices[0].message.content;
@@ -118,9 +127,9 @@ chatForm.addEventListener("submit", async (e) => {
       content: botReply,
     });
   } catch (error) {
-    console.error("Chat error:", error);
+    console.error("Chat error details:", error);
     loadingElement.textContent =
-      "I'm sorry, I encountered an issue connecting. Please ensure your Cloudflare Worker URL is configured and running.";
+      `I'm sorry, I encountered an issue: ${error.message}. Please check your Cloudflare Worker configuration.`;
   } finally {
     // Re-enable input and button for the next question
     userInput.disabled = false;
