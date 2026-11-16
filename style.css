@@ -1,3 +1,35 @@
+/* ==========================================================================
+   L'ORÉAL BRAND COLOR SCHEME (FutureBrand Identity Refresh)
+   Reference: https://www.futurebrand.com/our-work/loreal
+   
+   - Customary Black (#000000): Professional authority, elegance, minimalism
+   - Pure White (#FFFFFF): Crisp contrast and modern clean space
+   - Vibrant Red (#E4002B): FutureBrand addition mirroring passion & energy
+   - Parisian Gold (#C09853): Heritage luxury accent ("L'Or de L'Oréal")
+   ========================================================================== */
+
+:root {
+  /* Primary brand colors */
+  --loreal-black: #000000;          /* Elegance, authority, and high-fashion luxury */
+  --loreal-white: #ffffff;          /* Pure white for clean contrast */
+  --loreal-red: #e4002b;            /* Vibrant signature red for passion & energy */
+  --loreal-red-hover: #b80022;      /* Deeper red for hover states */
+
+  /* Supporting & accent colors */
+  --loreal-gold: #c09853;           /* Parisian gold heritage accent */
+  --loreal-gold-light: #f9f6f0;     /* Subtle warm champagne tint */
+  --loreal-bg-light: #fafafa;       /* Soft neutral background for the chat window */
+  --loreal-border: #e0e0e0;         /* Clean neutral border gray */
+  --loreal-text-primary: #121212;   /* Primary dark text for optimal readability */
+  --loreal-text-muted: #666666;     /* Muted gray for secondary text and footer */
+}
+
+/* —— text selection highlight —— */
+::selection {
+  background-color: var(--loreal-red);
+  color: var(--loreal-white);
+}
+
 /* —— basic reset —— */
 * {
   box-sizing: border-box;
@@ -7,10 +39,13 @@
 
 /* —— body + fonts —— */
 body {
-  font-family: "Montserrat", Arial, Helvetica, sans-serif;
-  color: #333;
+  /* Font stack incorporating L'Oréal's digital standard (Helvetica Now / Helvetica) and Montserrat */
+  font-family: "Helvetica Now", "Helvetica Neue", Helvetica, "Montserrat", Arial, sans-serif;
+  color: var(--loreal-text-primary);
+  background-color: var(--loreal-white);
   display: flex;
   justify-content: center;
+  min-height: 100vh;
 }
 
 .page-wrapper {
@@ -18,49 +53,79 @@ body {
   max-width: 900px;
 }
 
-/* header */
+/* —— header —— */
 .site-header {
   text-align: center;
   padding-top: 50px;
 }
 
-.site-title {
-  font-size: 22px;
-  font-weight: 500;
-  margin-bottom: 10px;
+/* L'Oréal brand logo */
+.brand-logo {
+  display: block;
+  margin: 0 auto 16px;
+  max-width: 190px;
+  width: 100%;
+  height: auto;
 }
 
-/* chat window */
+.site-title {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--loreal-black);
+  margin-bottom: 10px;
+  position: relative;
+  display: inline-block;
+}
+
+/* Subtle signature red accent bar under the title */
+.site-title::after {
+  content: "";
+  display: block;
+  width: 50px;
+  height: 3px;
+  background-color: var(--loreal-red);
+  margin: 10px auto 0;
+}
+
+/* —— chat window —— */
 .chatbox {
   margin: 40px 0;
 }
 
 .chat-window {
   height: 360px;
-  border: 1px solid #000;
+  border: 1px solid var(--loreal-border);
+  border-top: 3px solid var(--loreal-gold); /* Parisian gold luxury accent line */
+  border-radius: 4px;
   padding: 20px;
   font-size: 18px;
   line-height: 1.5;
   overflow-y: auto;
-  background: #fafafa;
+  background: var(--loreal-bg-light);
   white-space: pre-line;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
-/* messages */
+/* —— messages —— */
 .msg {
   margin-bottom: 14px;
   line-height: 1.5;
 }
 
+/* User message: bold, high-contrast black */
 .msg.user {
-  color: #000;
+  color: var(--loreal-black);
+  font-weight: 500;
 }
 
+/* AI response: refined dark neutral */
 .msg.ai {
-  color: #666666;
+  color: var(--loreal-text-muted);
 }
 
-/* input row */
+/* —— input row —— */
 .chat-form {
   display: flex;
   gap: 12px;
@@ -69,21 +134,30 @@ body {
 
 .chat-form input {
   flex: 1;
-  padding: 12px;
-  border: 1px solid #ccc;
+  padding: 12px 16px;
+  border: 1px solid var(--loreal-border);
+  border-radius: 4px;
   font-size: 18px;
+  font-family: inherit;
+  color: var(--loreal-text-primary);
+  background: var(--loreal-white);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+/* Input focus ring in L'Oréal red */
 .chat-form input:focus {
-  outline: 2px solid #000;
-  outline-offset: 2px;
+  outline: none;
+  border-color: var(--loreal-red);
+  box-shadow: 0 0 0 2px rgba(228, 0, 43, 0.2);
 }
 
+/* Send button in signature vibrant red */
 .chat-form button {
   font-size: 18px;
-  background: #000;
-  color: #fff;
+  background: var(--loreal-red);
+  color: var(--loreal-white);
   border: none;
+  border-radius: 4px;
   padding: 12px;
   width: 48px;
   height: 48px;
@@ -91,7 +165,7 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background-color 0.2s, transform 0.1s;
 }
 
 .chat-form button .material-icons {
@@ -99,15 +173,19 @@ body {
 }
 
 .chat-form button:hover {
-  background: #666666;
+  background: var(--loreal-red-hover);
+}
+
+.chat-form button:active {
+  transform: scale(0.98);
 }
 
 .chat-form button:focus {
-  outline: 2px solid #000;
+  outline: 2px solid var(--loreal-black);
   outline-offset: 2px;
 }
 
-/* visually hidden */
+/* —— visually hidden (accessibility utility) —— */
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -120,12 +198,14 @@ body {
   border: 0;
 }
 
-/* footer */
+/* —— footer —— */
 .site-footer {
   margin: 60px 0 40px;
   text-align: center;
   font-size: 14px;
-  color: #666;
+  color: var(--loreal-text-muted);
+  border-top: 1px solid var(--loreal-border);
+  padding-top: 24px;
 }
 
 .site-footer nav {
@@ -133,11 +213,13 @@ body {
 }
 
 .site-footer a {
-  margin: 0 8px;
-  color: #000;
+  margin: 0 10px;
+  color: var(--loreal-black);
   text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
 }
 
 .site-footer a:hover {
-  color: #666666;
+  color: var(--loreal-red);
 }
