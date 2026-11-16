@@ -12,7 +12,7 @@ const sendBtn = document.getElementById("sendBtn");
 /* 2. Cloudflare Worker URL
    Update this URL to point to your deployed Cloudflare Worker from RESOURCE_cloudflare-worker.js
    NOTE: Never put your OpenAI API key in client-side JavaScript. The Worker safely handles the key. */
-const WORKER_URL = "https://08-prj-loreal-chatbot.wufferssss.workers.dev/";
+const WORKER_URL = "https://orealworker.wufferssss.workers.dev";
 
 /* 3. System Prompt
    Guides the chatbot to act as a L'Oréal beauty advisor and politely refuse unrelated topics. */
